@@ -1,662 +1,604 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Heart, Share2, Users, DollarSign, Phone, Copy, Globe } from 'lucide-react';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, doc, onSnapshot, updateDoc } from 'firebase/firestore';
+import React, { useState } from 'react';
+import { Heart, Share2, Copy, Check } from 'lucide-react';
 
-// Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyB9v-u-4CcGqXMo7aZfrTmiLj8fuPBjIlM",
-  authDomain: "dylanmedical-feaff.firebaseapp.com",
-  projectId: "dylanmedical-feaff",
-  storageBucket: "dylanmedical-feaff.firebasestorage.app",
-  messagingSenderId: "735536597763",
-  appId: "1:735536597763:web:2e2ee0ce0e5703dfe2b736",
-  measurementId: "G-BC8BJS91RR"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-const DylanFundraiser = () => {
-  const [donationAmount, setDonationAmount] = useState('');
-  const [showZelleInfo, setShowZelleInfo] = useState(false);
-  const [copied, setCopied] = useState(false);
+function App() {
   const [language, setLanguage] = useState('en');
-  const [isMobile, setIsMobile] = useState(false);
-  const [error, setError] = useState('');
-  const [fundraiserData, setFundraiserData] = useState({
-    organizer: 'Jorge Romero & Marlen Popoca',
-    location: 'Newark, NJ',
-    goal: 35000,
-    raised: 8750,
-    donors: 67,
-    daysLeft: 52,
-    shares: 23,
-    hearts: 45,
-    zelleInfo: { phone: '(908) 884-4433' }
-  });
-
-  // Fetch fundraiser data from Firestore
-  useEffect(() => {
-    const docRef = doc(db, 'fundraisers', 'dylan');
-    const unsubscribe = onSnapshot(docRef, (docSnap) => {
-      if (docSnap.exists()) {
-        setFundraiserData(docSnap.data());
-        setError('');
-      } else {
-        setError('Failed to load fundraiser data.');
-      }
-    }, (err) => {
-      setError('Error fetching data: ' + err.message);
-    });
-    return () => unsubscribe();
-  }, []);
-
-  // Handle window resize for responsiveness
-  useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Memoize styles to prevent recalculation
-  const styles = useMemo(() => ({
-    container: {
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #EBF8FF 0%, #F3E8FF 100%)',
-      fontFamily: 'Arial, sans-serif'
-    },
-    maxWidth: {
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: isMobile ? '12px' : '16px'
-    },
-    languageToggle: {
-      position: 'fixed',
-      top: '20px',
-      right: '20px',
-      background: 'rgba(255, 255, 255, 0.95)',
-      border: '2px solid #3B82F6',
-      borderRadius: '50px',
-      padding: '8px 16px',
-      cursor: 'pointer',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontSize: '14px',
-      fontWeight: '600',
-      color: '#3B82F6',
-      zIndex: 1000,
-      transition: 'all 0.3s ease',
-      boxShadow: '0 4px 6px-1px rgba(0, 0, 0, 0.1)'
-    },
-    card: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-      marginBottom: isMobile ? '16px' : '24px',
-      overflow: 'hidden'
-    },
-    header: {
-      position: 'relative',
-      height: isMobile ? '250px' : '300px',
-      background: 'linear-gradient(to right, #EC4899, #8B5CF6)',
-      color: 'white',
-      padding: isMobile ? '20px' : '32px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      flexDirection: isMobile ? 'column' : 'row'
-    },
-    headerOverlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.3)'
-    },
-    headerContent: {
-      position: 'relative',
-      zIndex: 10,
-      flex: 1,
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center'
-    },
-    headerImage: {
-      position: 'relative',
-      zIndex: 10,
-      width: isMobile ? '120px' : '160px',
-      height: isMobile ? '120px' : '160px',
-      borderRadius: '50%',
-      border: '4px solid white',
-      objectFit: 'cover',
-      boxShadow: '0 8px 20px rgba(0, 0, 0, 0.3)',
-      marginTop: isMobile ? '16px' : '0',
-      marginLeft: isMobile ? '0' : '24px'
-    },
-    title: {
-      fontSize: isMobile ? '20px' : '28px',
-      fontWeight: 'bold',
-      marginBottom: '8px',
-      margin: 0,
-      lineHeight: '1.2'
-    },
-    subtitle: {
-      color: '#FBBF24',
-      margin: 0,
-      fontSize: isMobile ? '14px' : '16px'
-    },
-    grid: {
-      display: 'grid',
-      gridTemplateColumns: '1fr',
-      gap: isMobile ? '16px' : '24px'
-    },
-    gridLg: {
-      display: 'grid',
-      gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr',
-      gap: isMobile ? '16px' : '24px'
-    },
-    cardContent: {
-      padding: isMobile ? '16px' : '24px'
-    },
-    progressBar: {
-      width: '100%',
-      height: '12px',
-      backgroundColor: '#E5E7EB',
-      borderRadius: '6px',
-      overflow: 'hidden',
-      marginBottom: '16px'
-    },
-    progressFill: {
-      height: '100%',
-      background: 'linear-gradient(to right, #3B82F6, #8B5CF6)',
-      transition: 'width 0.5s ease'
-    },
-    button: {
-      width: '100%',
-      background: 'linear-gradient(to right, #3B82F6, #8B5CF6)',
-      color: 'white',
-      padding: isMobile ? '14px' : '16px',
-      borderRadius: '12px',
-      fontWeight: '600',
-      fontSize: isMobile ? '16px' : '18px',
-      border: 'none',
-      cursor: 'pointer',
-      transition: 'transform 0.2s, box-shadow 0.2s',
-      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-    },
-    buttonSecondary: {
-      width: '100%',
-      backgroundColor: 'transparent',
-      color: '#374151',
-      padding: '12px',
-      borderRadius: '12px',
-      fontWeight: '600',
-      fontSize: isMobile ? '14px' : '16px',
-      border: '2px solid #D1D5DB',
-      cursor: 'pointer',
-      marginTop: '12px',
-      transition: 'background-color 0.2s'
-    },
-    flexCenter: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    },
-    flexBetween: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: '8px'
-    },
-    textCenter: {
-      textAlign: 'center'
-    },
-    zelleCard: {
-      backgroundColor: 'white',
-      borderRadius: '16px',
-      boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-      padding: isMobile ? '16px' : '24px',
-      border: '2px solid #DBEAFE'
-    },
-    zelleInfo: {
-      backgroundColor: '#EBF8FF',
-      padding: '16px',
-      borderRadius: '8px',
-      marginBottom: '16px'
-    },
-    quickAmountGrid: {
-      display: 'grid',
-      gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(3, 1fr)',
-      gap: isMobile ? '6px' : '8px',
-      marginTop: '12px'
-    },
-    quickAmountBtn: {
-      backgroundColor: '#F3F4F6',
-      color: '#374151',
-      padding: '8px 12px',
-      borderRadius: '8px',
-      fontSize: '14px',
-      fontWeight: '500',
-      border: 'none',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s'
-    },
-    qrCodeContainer: {
-      display: 'flex',
-      justifyContent: 'center',
-      marginBottom: '16px'
-    },
-    errorMessage: {
-      color: '#DC2626',
-      fontSize: isMobile ? '12px' : '14px',
-      textAlign: 'center',
-      marginBottom: '16px'
-    }
-  }), [isMobile]);
-
-  const translations = {
+  const [copied, setCopied] = useState(false);
+  
+  const content = {
     en: {
-      languageToggle: 'ES',
-      medicalFundraiser: 'Medical Fundraiser',
-      title: 'Help Dylan Heal - Our Brave 12-Year-Old Boy',
-      organizer: 'Jorge Romero & Marlen Popoca',
-      location: 'Newark, NJ',
-      ourStory: 'Our Story',
-      story: 'On July 9, 2025, Dylan Romero—a joyful 12-year-old boy—was struck by a truck while riding his bicycle to meet friends at the park. The truck hit the rear wheel of his bike where Dylan suffered serious injuries.',
-      story2: 'He has already undergone two cranial surgeries and is being treated for a clavicle fracture. Dylan continues fighting for his recovery in the Pediatric Intensive Care Unit at University Hospital, where he remains since the accident.',
-      story3: 'We are asking for your support during this difficult time. Every donation will go directly to cover Dylan\'s medical and hospital expenses.',
-      story4: 'If you cannot help financially, your prayers and sharing this flyer are equally valuable.',
-      goalMessage: 'Let\'s join together to bring back the smile and joy to our beloved Dylan. Thank you for your attention.',
-      recentUpdates: 'Recent Updates',
-      update1Title: 'Recovering in ICU',
-      update1Text: 'Dylan continues his brave fight in the Pediatric ICU. Thank you for your continued support and prayers!',
-      update2Title: 'Fundraiser Launched',
-      update2Text: 'We\'ve officially launched Dylan\'s medical fundraiser. Your support means everything to our family.',
-      raised: 'raised',
-      goal: 'goal',
-      funded: 'funded',
-      daysLeft: 'days left',
-      donors: 'donors',
-      shares: 'shares',
-      hearts: 'hearts',
-      donateNow: 'Donate Now',
-      shareFundraiser: 'Share Fundraiser',
-      likeFundraiser: 'Like Fundraiser',
-      donateViaZelle: 'Donate via Zelle',
-      donateSecurely: 'Scan the QR code or use the phone number to send your donation securely',
-      phone: 'Phone',
-      copiedToClipboard: 'Copied to clipboard!',
-      quickAmounts: 'Quick amounts:',
-      contactOrganizer: 'Contact Organizer',
-      parentsOf: 'Parents of Dylan',
-      daysAgo: 'days ago',
-      weekAgo: 'week ago',
-      of: 'of',
-      error: 'An error occurred. Please try again later.'
+      title: "Help Dylan Romero Heal",
+      subtitle: "Our Brave 12-Year-Old Fighter",
+      storyTitle: "Dylan's Story",
+      story: "On July 9, 2025, Dylan Romero—a joyful 12-year-old—was hit by a truck while riding his bike to meet friends at the park. The truck struck the rear wheel, causing Dylan severe injuries. He has undergone two surgeries and is currently being treated for a fractured clavicle, fighting for recovery in the Pediatric Intensive Care Unit at the University Hospital since the accident.",
+      supportText: "We are asking for your support during this difficult time. Every donation will directly cover Dylan's medical and hospital costs. If you can't donate, please share this brave boy's story with your loved ones.",
+      donateTitle: "Make a Donation",
+      qrText: "Scan the Zelle QR code below to contribute:",
+      phoneText: "Or send your donation to Dylan's parents, Jorge Romero and Marlen Popoca:",
+      donateButton: "Donate Now",
+      raised: "Raised",
+      goal: "goal",
+      of: "of",
+      shareButton: "Share Dylan's Story",
+      copyLink: "Copy Link",
+      linkCopied: "Link Copied!",
+      thankYou: "Thank You for Your Support",
+      supportMessage: "Every donation helps Dylan on his road to recovery"
     },
     es: {
-      languageToggle: 'EN',
-      medicalFundraiser: 'Recaudación Médica',
-      title: 'Ayudemos a Dylan a Sanar - Nuestro Valiente Niño de 12 Años',
-      organizer: 'Jorge Romero y Marlen Popoca',
-      location: 'Newark, NJ',
-      ourStory: 'Nuestra Historia',
-      story: 'El 9 de Julio de 2025, Dylan Romero—un niño de 12 años lleno de alegría—fue atropellado por un camión mientras montaba su bicicleta para encontrarse con unos amigos en el parque. El camión impactó la rueda trasera de su bici donde Dylan sufrió heridas graves.',
-      story2: 'Ya ha sido sometido a dos cirugías craneales y está siendo tratado por una fractura de clavícula. Dylan sigue luchando por su recuperación en la Unidad de Cuidados Intensivos Pediátricos del Hospital Universitario, donde continúa desde del accidente.',
-      story3: 'Estamos pidiendo tu apoyo en este momento tan difícil. Cada donación se destinará directamente a cubrir los gastos médicos y hospitalarios de Dylan.',
-      story4: 'Si no puedes ayudar económicamente, tus oraciones y compartir este volante son igual de valiosos.',
-      goalMessage: 'Unámonos para devolverle la sonrisa y la alegría a nuestro querido Dylan. Gracias por su atención.',
-      recentUpdates: 'Actualizaciones Recientes',
-      update1Title: 'Recuperándose en UCI',
-      update1Text: 'Dylan continúa su valiente lucha en la UCI Pediátrica. ¡Gracias por su apoyo continuo y oraciones!',
-      update2Title: 'Recaudación Lanzada',
-      update2Text: 'Hemos lanzado oficialmente la recaudación médica de Dylan. Su apoyo significa todo para nuestra familia.',
-      raised: 'recaudado',
-      goal: 'meta',
-      funded: 'financiado',
-      daysLeft: 'días restantes',
-      donors: 'donantes',
-      shares: 'compartidos',
-      hearts: 'corazones',
-      donateNow: 'Donar Ahora',
-      shareFundraiser: 'Compartir Recaudación',
-      likeFundraiser: 'Me Gusta la Recaudación',
-      donateViaZelle: 'Donar por Zelle',
-      donateSecurely: 'Escanea el código QR o usa el número de teléfono para enviar tu donación de forma segura',
-      phone: 'Teléfono',
-      copiedToClipboard: '¡Copiado al portapapeles!',
-      quickAmounts: 'Cantidades rápidas:',
-      contactOrganizer: 'Contactar Organizador',
-      parentsOf: 'Padres de Dylan',
-      daysAgo: 'días atrás',
-      weekAgo: 'semana atrás',
-      of: 'de',
-      error: 'Ocurrió un error. Por favor intenta de nuevo.'
+      title: "Ayudemos a Dylan a Sanar",
+      subtitle: "Nuestro Valiente Luchador de 12 Años",
+      storyTitle: "Historia de Dylan",
+      story: "El 9 de julio de 2025, Dylan Romero—un niño de 12 años lleno de alegría—fue atropellado por un camión mientras montaba su bicicleta para encontrarse con unos amigos en el parque. El camión impactó la rueda trasera, donde Dylan sufrió heridas graves. Ha sido sometido a dos cirugías y está siendo tratado por una fractura de clavícula, luchando por su recuperación en la Unidad de Cuidados Intensivos Pediátricos del Hospital Universitario desde el accidente.",
+      supportText: "Estamos pidiendo tu apoyo en este momento tan difícil. Cada donación se destinará directamente a cubrir los gastos médicos y hospitalarios de Dylan. Si no puedes ayudar económicamente, por favor comparte la historia de este valiente niño con tus seres queridos.",
+      donateTitle: "Haz una Donación",
+      qrText: "Escanea el código QR de Zelle abajo para contribuir:",
+      phoneText: "O envía tu donación a los padres de Dylan, Jorge Romero y Marlen Popoca:",
+      donateButton: "Donar Ahora",
+      raised: "Recaudado",
+      goal: "objetivo",
+      of: "de un",
+      shareButton: "Comparte la Historia de Dylan",
+      copyLink: "Copiar Enlace",
+      linkCopied: "¡Enlace Copiado!",
+      thankYou: "Gracias por su Apoyo",
+      supportMessage: "Cada donación ayuda a Dylan en su camino hacia la recuperación"
     }
   };
 
-  const t = translations[language];
-  const progressPercentage = (fundraiserData.raised / fundraiserData.goal) * 100;
+  const currentContent = content[language];
 
-  const handleDonateClick = () => {
-    setShowZelleInfo(true);
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
-
-  const handleLikeClick = async () => {
-    try {
-      const docRef = doc(db, 'fundraisers', 'dylan');
-      await updateDoc(docRef, { hearts: fundraiserData.hearts + 1 });
-      setError('');
-    } catch (err) {
-      setError(t.error);
-    }
-  };
-
-  const handleShareClick = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: t.title,
-          text: t.story,
-          url: window.location.href
-        });
-        const docRef = doc(db, 'fundraisers', 'dylan');
-        await updateDoc(docRef, { shares: fundraiserData.shares + 1 });
-        setError('');
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-        const docRef = doc(db, 'fundraisers', 'dylan');
-        await updateDoc(docRef, { shares: fundraiserData.shares + 1 });
-      }
-    } catch (err) {
-      setError(t.error);
-    }
-  };
-
-  const copyToClipboard = async (text) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-      setError('');
-    } catch (err) {
-      setError(t.error);
-    }
-  };
-
-  const toggleLanguage = () => {
-    setLanguage(language === 'en' ? 'es' : 'en');
-  };
-
-  const quickAmounts = [25, 50, 100, 250, 500];
 
   return (
-    <div style={styles.container}>
-      <div style={styles.maxWidth}>
-        {/* Error Message */}
-        {error && <div style={styles.errorMessage}>{error}</div>}
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #f0f7ff 0%, #f8f0ff 50%, #fff0f6 100%)',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      {/* Navigation */}
+      <nav style={{
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+        boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 50
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '16px 20px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <Heart style={{ color: '#ef4444', width: '24px', height: '24px' }} />
+            <span style={{
+              fontWeight: 'bold',
+              fontSize: '20px',
+              color: '#374151'
+            }}>Dylan's Fund</span>
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => setLanguage('en')}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '25px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                backgroundColor: language === 'en' ? '#3b82f6' : '#e5e7eb',
+                color: language === 'en' ? 'white' : '#374151',
+                boxShadow: language === 'en' ? '0 4px 12px rgba(59, 130, 246, 0.4)' : 'none'
+              }}
+              onMouseOver={(e) => {
+                if (language !== 'en') {
+                  e.target.style.backgroundColor = '#d1d5db';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (language !== 'en') {
+                  e.target.style.backgroundColor = '#e5e7eb';
+                }
+              }}
+            >
+              English
+            </button>
+            <button
+              onClick={() => setLanguage('es')}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '25px',
+                fontSize: '14px',
+                fontWeight: '500',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                backgroundColor: language === 'es' ? '#3b82f6' : '#e5e7eb',
+                color: language === 'es' ? 'white' : '#374151',
+                boxShadow: language === 'es' ? '0 4px 12px rgba(59, 130, 246, 0.4)' : 'none'
+              }}
+              onMouseOver={(e) => {
+                if (language !== 'es') {
+                  e.target.style.backgroundColor = '#d1d5db';
+                }
+              }}
+              onMouseOut={(e) => {
+                if (language !== 'es') {
+                  e.target.style.backgroundColor = '#e5e7eb';
+                }
+              }}
+            >
+              Español
+            </button>
+          </div>
+        </div>
+      </nav>
 
-        {/* Language Toggle */}
-        <button
-          onClick={toggleLanguage}
-          style={styles.languageToggle}
-          aria-label={`Switch to ${language === 'en' ? 'Spanish' : 'English'}`}
-          onMouseEnter={(e) => {
-            e.target.style.backgroundColor = '#3B82F6';
-            e.target.style.color = 'white';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
-            e.target.style.color = '#3B82F6';
-          }}
-        >
-          <Globe size={16} aria-hidden="true" />
-          {t.languageToggle}
-        </button>
-
-        {/* Header */}
-        <section style={styles.card}>
-          <div style={styles.header}>
-            <div style={styles.headerOverlay}></div>
-            <div style={styles.headerContent}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-                <Heart size={isMobile ? 20 : 24} color="#FBBF24" />
-                <span style={{ color: '#FBBF24', fontWeight: '500', fontSize: isMobile ? '14px' : '16px' }}>{t.medicalFundraiser}</span>
+      {/* Hero Section */}
+      <div style={{
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(147, 51, 234, 0.2) 100%)'
+        }}></div>
+        <div style={{
+          position: 'relative',
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '64px 20px',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            animation: 'fadeIn 0.6s ease-out'
+          }}>
+            <h1 style={{
+              fontSize: window.innerWidth < 768 ? '32px' : window.innerWidth < 1024 ? '48px' : '64px',
+              fontWeight: 'bold',
+              color: '#374151',
+              marginBottom: '16px',
+              lineHeight: '1.2'
+            }}>
+              {currentContent.title}
+            </h1>
+            <p style={{
+              fontSize: window.innerWidth < 768 ? '18px' : window.innerWidth < 1024 ? '20px' : '24px',
+              color: '#6b7280',
+              marginBottom: '32px',
+              maxWidth: '600px',
+              margin: '0 auto 32px auto'
+            }}>
+              {currentContent.subtitle}
+            </p>
+            <div style={{
+              display: 'flex',
+              justifyContent: 'center',
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                width: window.innerWidth < 768 ? '192px' : '256px',
+                height: window.innerWidth < 768 ? '192px' : '256px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+                border: '4px solid rgba(255, 255, 255, 0.5)'
+              }}>
+                <img 
+                  src="/dylanpics.png" 
+                  alt="Dylan Romero" 
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover'
+                  }}
+                />
               </div>
-              <h1 style={styles.title}>{t.title}</h1>
-              <p style={styles.subtitle}>{fundraiserData.organizer} • {fundraiserData.location}</p>
             </div>
-            <img
-              src="/dylanpics.png"
-              alt="Portrait of Dylan Romero"
-              style={styles.headerImage}
-            />
-          </div>
-        </section>
-
-        <div style={isMobile ? styles.grid : styles.gridLg}>
-          {/* Main Content */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px' }}>
-            {/* Story Section */}
-            <section style={styles.card}>
-              <div style={styles.cardContent}>
-                <h2 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 'bold', color: '#1F2937', marginBottom: '16px' }}>{t.ourStory}</h2>
-                <div style={{ color: '#4B5563', lineHeight: '1.6' }}>
-                  <p style={{ marginBottom: '16px', fontSize: isMobile ? '14px' : '16px' }}>{t.story}</p>
-                  <p style={{ marginBottom: '16px', fontSize: isMobile ? '14px' : '16px' }}>{t.story2}</p>
-                  <p style={{ marginBottom: '16px', fontSize: isMobile ? '14px' : '16px' }}>{t.story3}</p>
-                  <p style={{ marginBottom: '16px', fontSize: isMobile ? '14px' : '16px' }}>{t.story4}</p>
-                  <p style={{ fontSize: isMobile ? '13px' : '14px', color: '#6B7280', fontWeight: '500' }}>{t.goalMessage}</p>
-                </div>
-              </div>
-            </section>
-
-            {/* Updates Section */}
-            <section style={styles.card}>
-              <div style={styles.cardContent}>
-                <h2 style={{ fontSize: isMobile ? '20px' : '24px', fontWeight: 'bold', color: '#1F2937', marginBottom: '16px' }}>{t.recentUpdates}</h2>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ borderLeft: '4px solid #3B82F6', paddingLeft: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
-                    <div style={styles.flexBetween}>
-                      <h3 style={{ fontWeight: '600', color: '#1F2937', fontSize: isMobile ? '14px' : '16px' }}>{t.update1Title}</h3>
-                      <span style={{ fontSize: '12px', color: '#6B7280' }}>3 {t.daysAgo}</span>
-                    </div>
-                    <p style={{ color: '#4B5563', marginTop: '8px', fontSize: isMobile ? '13px' : '14px' }}>{t.update1Text}</p>
-                  </div>
-                  <div style={{ borderLeft: '4px solid #10B981', paddingLeft: '16px', paddingTop: '8px', paddingBottom: '8px' }}>
-                    <div style={styles.flexBetween}>
-                      <h3 style={{ fontWeight: '600', color: '#1F2937', fontSize: isMobile ? '14px' : '16px' }}>{t.update2Title}</h3>
-                      <span style={{ fontSize: '12px', color: '#6B7280' }}>1 {t.weekAgo}</span>
-                    </div>
-                    <p style={{ color: '#4B5563', marginTop: '8px', fontSize: isMobile ? '13px' : '14px' }}>{t.update2Text}</p>
-                  </div>
-                </div>
-              </div>
-            </section>
-          </div>
-
-          {/* Sidebar */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: isMobile ? '16px' : '24px' }}>
-            {/* Progress Card */}
-            <section style={styles.card}>
-              <div style={styles.cardContent}>
-                <div style={{ ...styles.textCenter, marginBottom: '24px' }}>
-                  <div style={{ fontSize: isMobile ? '24px' : '28px', fontWeight: 'bold', color: '#1F2937', marginBottom: '4px' }}>
-                    ${fundraiserData.raised.toLocaleString()}
-                  </div>
-                  <div style={{ color: '#4B5563', fontSize: isMobile ? '14px' : '16px' }}>
-                    {t.raised} {t.of} ${fundraiserData.goal.toLocaleString()} {t.goal}
-                  </div>
-                </div>
-
-                <div style={{ marginBottom: '24px' }}>
-                  <div style={styles.progressBar}>
-                    <div
-                      style={{ ...styles.progressFill, width: `${Math.min(progressPercentage, 100)}%` }}
-                    ></div>
-                  </div>
-                  <div style={styles.flexBetween}>
-                    <span style={{ fontSize: isMobile ? '12px' : '14px', color: '#4B5563' }}>{Math.round(progressPercentage)}% {t.funded}</span>
-                    <span style={{ fontSize: isMobile ? '12px' : '14px', color: '#4B5563' }}>{fundraiserData.daysLeft} {t.daysLeft}</span>
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', justifyContent: 'space-around', textAlign: 'center', marginBottom: '24px' }}>
-                  <div>
-                    <div style={{ ...styles.flexCenter, fontSize: isMobile ? '16px' : '20px', fontWeight: 'bold', color: '#1F2937', gap: '4px' }}>
-                      <Users size={isMobile ? 16 : 20} />
-                      {fundraiserData.donors}
-                    </div>
-                    <div style={{ fontSize: isMobile ? '12px' : '14px', color: '#4B5563' }}>{t.donors}</div>
-                  </div>
-                  <div>
-                    <div style={{ ...styles.flexCenter, fontSize: isMobile ? '16px' : '20px', fontWeight: 'bold', color: '#1F2937', gap: '4px' }}>
-                      <Share2 size={isMobile ? 16 : 20} />
-                      {fundraiserData.shares}
-                    </div>
-                    <div style={{ fontSize: isMobile ? '12px' : '14px', color: '#4B5563' }}>{t.shares}</div>
-                  </div>
-                  <div>
-                    <div style={{ ...styles.flexCenter, fontSize: isMobile ? '16px' : '20px', fontWeight: 'bold', color: '#1F2937', gap: '4px' }}>
-                      <Heart size={isMobile ? 16 : 20} />
-                      {fundraiserData.hearts}
-                    </div>
-                    <div style={{ fontSize: isMobile ? '12px' : '14px', color: '#4B5563' }}>{t.hearts}</div>
-                  </div>
-                </div>
-
-                <button
-                  onClick={handleDonateClick}
-                  style={styles.button}
-                  aria-label="Open donation options"
-                  onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                  onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                >
-                  {t.donateNow}
-                </button>
-
-                <button
-                  onClick={handleShareClick}
-                  style={styles.buttonSecondary}
-                  aria-label="Share fundraiser"
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#F9FAFB'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                >
-                  {t.shareFundraiser}
-                </button>
-
-                <button
-                  onClick={handleLikeClick}
-                  style={{ ...styles.buttonSecondary, marginTop: '12px' }}
-                  aria-label="Like fundraiser"
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#F9FAFB'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                >
-                  {t.likeFundraiser}
-                </button>
-              </div>
-            </section>
-
-            {/* Zelle Payment Info */}
-            {showZelleInfo && (
-              <section style={styles.zelleCard}>
-                <div style={styles.textCenter}>
-                  <div style={{
-                    width: '64px',
-                    height: '64px',
-                    background: 'linear-gradient(to right, #3B82F6, #8B5CF6)',
-                    borderRadius: '50%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 12px'
-                  }}>
-                    <DollarSign size={32} color="white" />
-                  </div>
-                  <h3 style={{ fontSize: isMobile ? '18px' : '20px', fontWeight: 'bold', color: '#1F2937' }}>{t.donateViaZelle}</h3>
-                  <p style={{ color: '#4B5563', fontSize: isMobile ? '13px' : '14px', marginTop: '4px' }}>{t.donateSecurely}</p>
-                </div>
-
-                <div style={{ marginTop: '16px' }}>
-                  <div style={styles.qrCodeContainer}>
-                    <img
-                      src="/zelle-qr.png"
-                      alt="Zelle QR code for donations"
-                      style={{
-                        width: isMobile ? '120px' : '160px',
-                        height: isMobile ? '120px' : '160px',
-                        padding: '8px',
-                        backgroundColor: '#FFFFFF',
-                        borderRadius: '8px'
-                      }}
-                    />
-                  </div>
-
-                  <div style={styles.zelleInfo}>
-                    <div style={styles.flexBetween}>
-                      <span style={{ fontSize: isMobile ? '13px' : '14px', fontWeight: '500', color: '#374151' }}>{t.phone}</span>
-                      <button
-                        onClick={() => copyToClipboard(fundraiserData.zelleInfo.phone)}
-                        style={{ background: 'none', border: 'none', color: '#3B82F6', cursor: 'pointer' }}
-                        aria-label="Copy phone number"
-                      >
-                        <Copy size={16} />
-                      </button>
-                    </div>
-                    <div style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: '600', color: '#1F2937' }}>{fundraiserData.zelleInfo.phone}</div>
-                  </div>
-
-                  <div style={{ fontSize: '12px', color: '#6B7280', textAlign: 'center', marginBottom: '16px', minHeight: '20px' }}>
-                    {copied && <span style={{ color: '#10B981' }}>{t.copiedToClipboard}</span>}
-                  </div>
-
-                  <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '16px' }}>
-                    <p style={{ fontSize: isMobile ? '13px' : '14px', color: '#4B5563', marginBottom: '12px' }}>{t.quickAmounts}</p>
-                    <div style={styles.quickAmountGrid}>
-                      {quickAmounts.map(amount => (
-                        <button
-                          key={amount}
-                          style={styles.quickAmountBtn}
-                          onClick={() => setDonationAmount(amount.toString())}
-                          aria-label={`Select $${amount} donation`}
-                          onMouseEnter={(e) => e.target.style.backgroundColor = '#E5E7EB'}
-                          onMouseLeave={(e) => e.target.style.backgroundColor = '#F3F4F6'}
-                        >
-                          ${amount}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* Contact Info */}
-            <section style={styles.card}>
-              <div style={styles.cardContent}>
-                <h3 style={{ fontSize: isMobile ? '16px' : '18px', fontWeight: 'bold', color: '#1F2937', marginBottom: '16px' }}>{t.contactOrganizer}</h3>
-                <p style={{ fontSize: isMobile ? '13px' : '14px', color: '#6B7280', marginBottom: '12px' }}>{t.parentsOf}</p>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: '#4B5563', fontSize: isMobile ? '13px' : '14px' }}>
-                    <Phone size={isMobile ? 16 : 20} />
-                    <span>{fundraiserData.zelleInfo.phone}</span>
-                  </div>
-                </div>
-              </div>
-            </section>
           </div>
         </div>
       </div>
+
+      {/* Main Content */}
+      <div style={{
+        maxWidth: '1200px',
+        margin: '0 auto',
+        padding: '48px 20px'
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: window.innerWidth < 1024 ? '1fr' : '2fr 1fr',
+          gap: '32px'
+        }}>
+          
+          {/* Story Section */}
+          <div>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1)',
+              padding: '32px',
+              transform: 'scale(1)',
+              transition: 'transform 0.3s ease'
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = 'scale(1.02)';
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+            >
+              <h2 style={{
+                fontSize: window.innerWidth < 768 ? '20px' : '24px',
+                fontWeight: 'bold',
+                color: '#374151',
+                marginBottom: '24px',
+                display: 'flex',
+                alignItems: 'center'
+              }}>
+                <Heart style={{ 
+                  width: window.innerWidth < 768 ? '20px' : '24px', 
+                  height: window.innerWidth < 768 ? '20px' : '24px', 
+                  color: '#ef4444', 
+                  marginRight: '12px' 
+                }} />
+                {currentContent.storyTitle}
+              </h2>
+              
+              <div>
+                <p style={{
+                  color: '#374151',
+                  lineHeight: '1.6',
+                  marginBottom: '24px',
+                  fontSize: window.innerWidth < 768 ? '16px' : '18px'
+                }}>
+                  {currentContent.story}
+                </p>
+                
+                <p style={{
+                  color: '#374151',
+                  lineHeight: '1.6',
+                  fontSize: window.innerWidth < 768 ? '16px' : '18px'
+                }}>
+                  {currentContent.supportText}
+                </p>
+              </div>
+
+              <div style={{
+                marginTop: '32px',
+                padding: '24px',
+                background: 'linear-gradient(90deg, #f0f7ff 0%, #f8f0ff 100%)',
+                borderRadius: '12px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: window.innerWidth < 640 ? 'column' : 'row',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '16px'
+                }}>
+                  <button
+                    onClick={handleCopyLink}
+                    style={{
+                      width: window.innerWidth < 640 ? '100%' : 'auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '8px',
+                      backgroundColor: 'white',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '25px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      transform: 'scale(1)'
+                    }}
+                    onMouseOver={(e) => {
+                      e.target.style.backgroundColor = '#f9fafb';
+                      e.target.style.transform = 'scale(1.05)';
+                    }}
+                    onMouseOut={(e) => {
+                      e.target.style.backgroundColor = 'white';
+                      e.target.style.transform = 'scale(1)';
+                    }}
+                  >
+                    {copied ? <Check style={{ width: '20px', height: '20px', color: '#22c55e' }} /> : <Copy style={{ width: '20px', height: '20px', color: '#6b7280' }} />}
+                    <span style={{
+                      fontWeight: '500',
+                      color: '#374151'
+                    }}>
+                      {copied ? currentContent.linkCopied : currentContent.copyLink}
+                    </span>
+                  </button>
+                  <button style={{
+                    width: window.innerWidth < 640 ? '100%' : 'auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                    backgroundColor: '#3b82f6',
+                    color: 'white',
+                    border: 'none',
+                    padding: '12px 24px',
+                    borderRadius: '25px',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    transform: 'scale(1)'
+                  }}
+                  onMouseOver={(e) => {
+                    e.target.style.backgroundColor = '#2563eb';
+                    e.target.style.transform = 'scale(1.05)';
+                  }}
+                  onMouseOut={(e) => {
+                    e.target.style.backgroundColor = '#3b82f6';
+                    e.target.style.transform = 'scale(1)';
+                  }}
+                  >
+                    <Share2 style={{ width: '20px', height: '20px' }} />
+                    <span style={{ fontWeight: '500' }}>{currentContent.shareButton}</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Donation Section */}
+          <div>
+            <div style={{
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              boxShadow: '0 25px 50px rgba(0, 0, 0, 0.1)',
+              padding: window.innerWidth < 768 ? '24px' : '32px',
+              position: window.innerWidth >= 1024 ? 'sticky' : 'static',
+              top: window.innerWidth >= 1024 ? '96px' : 'auto'
+            }}>
+              <h2 style={{
+                fontSize: window.innerWidth < 768 ? '18px' : '20px',
+                fontWeight: 'bold',
+                color: '#374151',
+                marginBottom: '24px',
+                textAlign: 'center'
+              }}>
+                {currentContent.donateTitle}
+              </h2>
+
+              {/* Progress Bar */}
+              <div style={{ marginBottom: '24px' }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#6b7280',
+                  marginBottom: '8px'
+                }}>
+                  <span>{currentContent.raised}: 30%</span>
+                  <span>{currentContent.of} $10,000</span>
+                </div>
+                <div style={{
+                  width: '100%',
+                  backgroundColor: '#e5e7eb',
+                  borderRadius: '10px',
+                  height: '12px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%)',
+                    borderRadius: '10px',
+                    width: '30%',
+                    transition: 'width 1s ease-out'
+                  }}></div>
+                </div>
+                <div style={{
+                  textAlign: 'center',
+                  marginTop: '8px',
+                  fontSize: '14px',
+                  color: '#6b7280'
+                }}>
+                  30% {currentContent.of} {currentContent.goal}
+                </div>
+              </div>
+
+              {/* QR Code */}
+              <div style={{
+                textAlign: 'center',
+                marginBottom: '24px'
+              }}>
+                <p style={{
+                  fontSize: '14px',
+                  color: '#6b7280',
+                  marginBottom: '16px'
+                }}>{currentContent.qrText}</p>
+                <div style={{
+                  width: window.innerWidth < 768 ? '160px' : '192px',
+                  height: window.innerWidth < 768 ? '160px' : '192px',
+                  margin: '0 auto',
+                  background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
+                }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{
+                      width: window.innerWidth < 768 ? '96px' : '128px',
+                      height: window.innerWidth < 768 ? '96px' : '128px',
+                      backgroundColor: 'white',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      marginBottom: '8px'
+                    }}>
+                      <span style={{
+                        fontSize: '12px',
+                        color: '#6b7280'
+                      }}>QR Code</span>
+                    </div>
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6b7280'
+                    }}>Zelle QR Code</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Contact Info */}
+              <div style={{
+                textAlign: 'center',
+                marginBottom: '24px'
+              }}>
+                <p style={{
+                  fontSize: '14px',
+                  color: '#6b7280',
+                  marginBottom: '8px'
+                }}>{currentContent.phoneText}</p>
+                <p style={{
+                  fontWeight: '600',
+                  fontSize: '18px',
+                  color: '#374151',
+                  backgroundColor: '#f9fafb',
+                  borderRadius: '8px',
+                  padding: '8px 16px'
+                }}>
+                  (908) 884-4433
+                </p>
+              </div>
+
+              {/* Donate Button */}
+              <button style={{
+                width: '100%',
+                background: 'linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%)',
+                color: 'white',
+                fontWeight: 'bold',
+                padding: '16px 24px',
+                fontSize: '16px',
+                borderRadius: '12px',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                transform: 'scale(1)',
+                boxShadow: '0 8px 25px rgba(59, 130, 246, 0.3)'
+              }}
+              onMouseOver={(e) => {
+                e.target.style.background = 'linear-gradient(90deg, #2563eb 0%, #7c3aed 100%)';
+                e.target.style.transform = 'scale(1.05)';
+                e.target.style.boxShadow = '0 12px 35px rgba(59, 130, 246, 0.4)';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.background = 'linear-gradient(90deg, #3b82f6 0%, #8b5cf6 100%)';
+                e.target.style.transform = 'scale(1)';
+                e.target.style.boxShadow = '0 8px 25px rgba(59, 130, 246, 0.3)';
+              }}
+              >
+                <Heart style={{ width: '20px', height: '20px', display: 'inline', marginRight: '8px' }} />
+                {currentContent.donateButton}
+              </button>
+
+              {/* Thank You Message */}
+              <div style={{
+                marginTop: '32px',
+                paddingTop: '24px',
+                borderTop: '1px solid #e5e7eb'
+              }}>
+                <h3 style={{
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '16px',
+                  textAlign: 'center'
+                }}>
+                  {currentContent.thankYou}
+                </h3>
+                <div style={{ textAlign: 'center' }}>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6b7280'
+                  }}>
+                    {currentContent.supportMessage}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <footer style={{
+        backgroundColor: '#1f2937',
+        color: 'white',
+        padding: '32px 0',
+        marginTop: '64px'
+      }}>
+        <div style={{
+          maxWidth: '1200px',
+          margin: '0 auto',
+          padding: '0 20px',
+          textAlign: 'center'
+        }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            marginBottom: '16px'
+          }}>
+            <Heart style={{ color: '#ef4444', width: '24px', height: '24px' }} />
+            <span style={{
+              fontWeight: 'bold',
+              fontSize: '20px'
+            }}>Dylan's Fund</span>
+          </div>
+          <p style={{
+            color: '#9ca3af'
+          }}>
+            {language === 'en' 
+              ? 'Every donation makes a difference. Thank you for your support.'
+              : 'Cada donación marca la diferencia. Gracias por su apoyo.'
+            }
+          </p>
+        </div>
+      </footer>
+
+      <style jsx>{`
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+      `}</style>
     </div>
   );
-};
+}
 
-export default DylanFundraiser;
+export default App;
